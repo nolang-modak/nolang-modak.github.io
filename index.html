@@ -9,31 +9,44 @@
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
+            background-color: #f4f4f4;
         }
 
         .container {
-            width: 300px;
+            width: 80%;
+            max-width: 400px;
+            margin: 50px auto;
             padding: 20px;
-            text-align: center;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
         h1 {
             font-size: 24px;
             margin-bottom: 20px;
+            color: #333;
         }
 
         input[type="text"] {
-            width: 100%;
+            width: calc(100% - 48px);
             margin-bottom: 10px;
             padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            outline: none;
         }
 
         button {
+            
             padding: 8px 16px;
+            margin-top: 10px;
             background-color: #007bff;
             color: #fff;
             border: none;
+            border-radius: 4px;
             cursor: pointer;
+            outline: none;
         }
 
         button:hover {
@@ -46,11 +59,31 @@
         }
 
         li {
-            margin-bottom: 5px;
+            margin-bottom: 10px;
+            padding: 8px;
+            background-color: #f9f9f9;
+            border-radius: 4px;
+            position: relative;
         }
 
         .resolveButton {
-            background-color: #dc3545;
+            position: absolute;
+            right: 10px;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            outline: none;
+        }
+
+        .resolveButton img {
+            width: 20px;
+            height: 20px;
+            display: block;
+        }
+
+        .ticketId {
+            font-weight: bold;
         }
     </style>
 </head>
@@ -58,7 +91,7 @@
     <div class="container">
         <h1>Ticket Tracker</h1>
         <input type="text" id="ticketIdInput" placeholder="Enter Ticket ID">
-        <button id="addButton">Add</button>
+        <button id="addButton">Add Ticket</button>
         <ul id="ticketList"></ul>
     </div>
     <!-- Include Firebase SDK scripts via CDN -->
@@ -74,6 +107,7 @@
     messagingSenderId: "230964594360",
     appId: "1:230964594360:web:c7283dda46e06762d6164d"
   };
+
 
         firebase.initializeApp(firebaseConfig);
 
@@ -102,23 +136,24 @@
             ticketList.innerHTML = '';
             snapshot.forEach(doc => {
                 const listItem = document.createElement('li');
-                listItem.textContent = doc.data().ticketId;
-
-                const resolveButton = document.createElement('button');
-                resolveButton.textContent = 'Resolve';
-                resolveButton.className = 'resolveButton';
-                resolveButton.addEventListener('click', async () => {
-                    try {
-                        await db.collection('tickets').doc(doc.id).delete();
-                    } catch (error) {
-                        console.error('Error resolving ticket: ', error);
-                    }
-                });
-
-                listItem.appendChild(resolveButton);
+                listItem.classList.add('ticket-item');
+                listItem.innerHTML = `
+                    <span class="ticketId">${doc.data().ticketId}</span>
+                    <button class="resolveButton" onclick="resolveTicket('${doc.id}')">
+                        <img src="tick.png" alt="Resolve">
+                    </button>
+                `;
                 ticketList.appendChild(listItem);
             });
         });
+
+        function resolveTicket(ticketId) {
+            try {
+                db.collection('tickets').doc(ticketId).delete();
+            } catch (error) {
+                console.error('Error resolving ticket: ', error);
+            }
+        }
     </script>
 </body>
 </html>
